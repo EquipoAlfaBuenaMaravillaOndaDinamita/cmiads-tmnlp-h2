@@ -1,29 +1,46 @@
 import scrapy
+from scrapy.selector import Selector
 
 class PaginationSpider(scrapy.Spider):
     name = 'pagination'
-    allowed_domains = ['data.gov']
-    start_urls = ['https://catalog.data.gov/dataset']
-    custom_settings = {"FEEDS":{"results.json":{"format":"json", "overwrite": True}}}
-    max_pages = 25
+    allowed_domains = ['tripadvisor.com']
+    start_urls = ['https://www.tripadvisor.com/Hotel_Review-g34438-d2253238-Reviews-Hampton_Inn_Suites_by_Hilton_Miami_Brickell_Downtown-Miami_Florida.html']
+    custom_settings = {"FEEDS":{"results.csv":{"format":"csv", "overwrite": True}}}
+    max_pages = 15
 
     def parse(self, response, page=1):
-        ## parse page
-        yield from response.follow_all(css='h3.dataset-heading a', callback=self.parseDocument, cb_kwargs={'page': page})
+        reviews = response.css('div[data-test-target="reviews-tab"] div[data-test-target="HR_CC_CARD"]').getall()
+        for review in reviews:
+            yield self.parseReview(review)
 
         ## search next page
-        if (page < self.max_pages):
-            href_ = response.xpath("//li/a[contains(text(), '»')]/@href").extract_first()
-            if href_ is not None:
-                # next_url = response.urljoin(href_)
-                yield response.follow(href_, callback=self.parse, cb_kwargs={'page': page+1})
+        href_ = response.xpath("//a[contains(@class, 'ui_button') and contains(@class, 'nav') and contains(@class, 'next') and contains(@class, 'primary')]/@href").extract_first()
+        self.log(f'href: {href_}')
+        if (page < self.max_pages and href_ != None):
+            yield response.follow(href_, callback=self.parse, cb_kwargs={'page': page+1})
     
-    def parseDocument(self, response, page):
-        name = response.css('h1[itemprop="name"]::text').extract_first().strip()
-        description = response.css('div[itemprop="description"] p::text').extract_first().strip()
-        item = {'page': page,'url': response.url,'body': {}}
-        if name:
-            item['body']['title'] = name
-        if description:
-            item['body']['paragraph'] = description
-        yield item
+    def parseReview(self, html):
+        response = Selector(text=html)
+        title = response.css('div[data-test-target="review-title"] a span span::text').extract_first()
+        rating_classes = response.css('div[data-test-target="review-rating"] span::attr(class)').extract_first().split(' ')
+        rating = ''
+        for rc in rating_classes:
+            if 'bubble_50' in rc:
+                rating = 'Excelent'
+            elif 'bubble_40' in rc:
+                rating = 'Very Good'
+            elif 'bubble_30' in rc:
+                rating = 'Average'
+            elif 'bubble_20' in rc:
+                rating = 'Poor'
+            elif 'bubble_10' in rc:
+                rating = 'Terrible'
+        
+        review = response.css('q span::text').extract_first()
+
+        result = {
+            "rating": rating
+            , "title": title
+            , "review": review
+        }
+        return result
