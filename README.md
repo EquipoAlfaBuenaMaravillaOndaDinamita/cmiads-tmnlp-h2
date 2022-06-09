@@ -8,7 +8,7 @@ python3 -m venv venv
 
 ## libraries
 ```bash
-pip install -m requirements.txt
+pip install -r requirements.txt
 ```
 
 # run
