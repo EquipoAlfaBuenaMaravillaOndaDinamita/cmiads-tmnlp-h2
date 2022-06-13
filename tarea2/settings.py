@@ -1,4 +1,4 @@
-# Scrapy settings for tarea1 project
+# Scrapy settings for tarea2 project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,14 +7,14 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'tarea1'
+BOT_NAME = 'tarea2'
 
-SPIDER_MODULES = ['tarea1.spiders']
-NEWSPIDER_MODULE = 'tarea1.spiders'
+SPIDER_MODULES = ['tarea2.spiders']
+NEWSPIDER_MODULE = 'tarea2.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'tarea1 (+http://www.yourdomain.com)'
+#USER_AGENT = 'tarea2 (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -45,13 +45,13 @@ ROBOTSTXT_OBEY = False
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'tarea1.middlewares.Tarea1SpiderMiddleware': 543,
+#    'tarea2.middlewares.Tarea2SpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'tarea1.middlewares.Tarea1DownloaderMiddleware': 543,
+#    'tarea2.middlewares.Tarea2DownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    'tarea1.pipelines.Tarea1Pipeline': 300,
+#    'tarea2.pipelines.Tarea2Pipeline': 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)

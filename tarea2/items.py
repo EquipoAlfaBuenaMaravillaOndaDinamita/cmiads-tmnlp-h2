@@ -6,7 +6,7 @@
 import scrapy
 
 
-class Tarea1Item(scrapy.Item):
+class Tarea2Item(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
