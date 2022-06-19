@@ -7,18 +7,25 @@ class PaginationSpider(scrapy.Spider):
     name = 'pagination'
     allowed_domains = ['wikipedia.org']
     start_urls = ["https://es.wikipedia.org/wiki/Tecnolog%C3%ADa"]
-    custom_settings = {'FEEDS':{'test1.csv':{'format':'csv', 'overwrite': True}}}
+    
     max_tokens = 10000
     current_tokens = 0
+    urls_followed = []
+    urls_to_follow = []
     
     def __init__(self, *args, **kwargs):
         super(PaginationSpider, self).__init__(*args, **kwargs)
         if 'tokens' in kwargs:
             tokens = int(kwargs.get('tokens'))
             self.max_tokens = tokens
+        self.urls_followed = [i for i in self.start_urls]
+
 
     def parse(self, response):
-        
+        # get title
+        title = response.css('[id="firstHeading"]::text').extract_first().strip()
+
+        # check if already got the max tokens
         if self.current_tokens > self.max_tokens:
             return
         
@@ -27,9 +34,14 @@ class PaginationSpider(scrapy.Spider):
         
         # remove html content with Beautiful soup library
         text = BeautifulSoup(html_body,'lxml').get_text()
-        text = re.sub('\n+','. ',text)
-        text = re.sub(' +',' ',text).replace('[editar]','').strip()
+        text = text.replace('↑','')
+        text = re.sub('\n+','. ',text)      # all text in one line
+        text = re.sub('[ \t]+',' ',text)    # consecutive spaces and tabs as one space
+        text = re.sub('\\[[0-9A-Za-z]+\\]','',text)     # remove references
+        text = re.sub('(\.+ *)+','. ',text) # multiple dots with spaces between them
+        text = title+'. '+text.strip()
         
+        # split in tokens
         tokens = text.split(' ')
         
         if self.current_tokens + len(tokens) > self.max_tokens:
@@ -40,11 +52,13 @@ class PaginationSpider(scrapy.Spider):
             self.current_tokens += len(tokens)
             yield {'text':text}
         
-        self.log(f'************************************** current tokens:{self.current_tokens}')
+        # log url, title and current tokens
+        self.log(f'******** URL:{response.request.url}')
+        self.log(f'\t** Title:{title}')
+        self.log(f'\t** current tokens:{self.current_tokens}')
 
         if self.current_tokens < self.max_tokens:
-            # search new urls
-            link_list = []
+            # search new urls to follow
             for a in response.css('div.mw-parser-output a'):
                 tmp_url = a.xpath('.//@href').get()
                 # search only for wikipedia links
@@ -58,15 +72,22 @@ class PaginationSpider(scrapy.Spider):
                     # discard ISBN book searchs
                     if 'especial:fuentesdelibros' in tmp_url.lower():
                         continue
-                    link_list.append(tmp_url)
-            # remove duplicate links
-            link_list = list(set(link_list))
+                    
+                    # search if current link already followed or is on list to follow
+                    if tmp_url in self.urls_followed or tmp_url in self.urls_to_follow:
+                        continue
+                    
+                    # add url to follow
+                    self.urls_to_follow.append(tmp_url)
 
-            for link in link_list:
-                #self.log(link)
-                if self.current_tokens > self.max_tokens:
-                    break
-                yield response.follow(url=link, callback=self.parse)
-                #yield scrapy.Request(url='https://en.wikipedia.org'+link, callback=self.parse)
-    
+            # follow next url in list
+            if len(self.urls_to_follow)>0:
+                # follow first url
+                current_url = self.urls_to_follow[0]
+                self.urls_to_follow.pop(0)
+                # mark as followed
+                self.urls_followed.append(current_url)
+                # follow
+                yield response.follow(url=current_url, callback=self.parse)
+                
           
