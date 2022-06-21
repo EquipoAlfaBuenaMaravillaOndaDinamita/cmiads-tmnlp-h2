@@ -46,5 +46,5 @@ Se toma cada vector y se grafica como _subplot_ para poder comparar la tendencia
 
 # Contribuciones
 Grupo 3 en canvas
-- Kevin García: 
-- Martín Guzmán: 
+- Martín Guzmán: crawler base con parse de artículos de wikipedia y navegación a distintos artículos para satisfacer condición de tokens
+- Kevin García: repositorio, jupyter con lectura de archivos y cálculo de tokens únicos

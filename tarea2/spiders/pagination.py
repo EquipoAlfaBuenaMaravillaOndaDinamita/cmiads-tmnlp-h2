@@ -72,6 +72,8 @@ class PaginationSpider(scrapy.Spider):
                     # discard ISBN book searchs
                     if 'especial:fuentesdelibros' in tmp_url.lower():
                         continue
+                    if 'portal:' in tmp_url.lower():
+                        continue
                     
                     # search if current link already followed or is on list to follow
                     if tmp_url in self.urls_followed or tmp_url in self.urls_to_follow:
