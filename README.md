@@ -16,9 +16,3 @@ pip install -r requirements.txt
 ```bash
 ./gen_tokens.bat
 ```
- <iframe id="inlineFrameExample"
-      title="Inline Frame Example"
-      width="300"
-      height="200"
-      src="https://www.google.com">
-  </iframe>
